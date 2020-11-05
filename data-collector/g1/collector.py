@@ -3,6 +3,8 @@ import requests as req
 import json
 import re
 import sys
+import lxml.html
+import lxml.html.clean
 
 news=sys.argv[1]
 comment_sample = '{id};{content};{likes};{dislikes};{reply_to};{news_id};{news_title};{news_link}\n'
@@ -10,7 +12,11 @@ comment_sample = '{id};{content};{likes};{dislikes};{reply_to};{news_id};{news_t
 def remove_html(raw_html):
     cleanr = re.compile('<.*?>')
     cleantext = re.sub(cleanr, '', raw_html)
-    return cleantext
+    doc = lxml.html.fromstring(cleantext)
+    cleaner = lxml.html.clean.Cleaner(style=True)
+    doc = cleaner.clean_html(doc)
+    text = doc.text_content()
+    return text
 
 def retrieve_news_title_from_link(link):
     return link.split('/')[-1].strip('.ghtml').replace('-', ' ').capitalize()
